@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Спаси предложения!</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body {
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#140e2a;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .scene {
+    position:absolute;
+    left:0; top:0; bottom:0;
+    width:58vw;
+    overflow:hidden;
+    background: radial-gradient(circle at 40% 45%, #3a2a5e 0%, #241a44 45%, #140e2a 100%);
+  }
+
+  .frame-right {
+    position:absolute;
+    top:25px; right:25px; bottom:25px;
+    left: calc(58vw + 25px);
+    background: #faf6ff;
+    border-radius:20px;
+    z-index:5;
+    overflow-y: auto;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  }
+
+  .frame-gap-top, .frame-gap-bottom, .frame-gap-right, .frame-gap-left {
+    position:absolute; background:#140e2a; z-index:4; pointer-events:none;
+  }
+  .frame-gap-top    { top:0; left:calc(58vw); right:0; height:25px; }
+  .frame-gap-bottom { bottom:0; left:calc(58vw); right:0; height:25px; }
+  .frame-gap-right  { top:0; bottom:0; right:0; width:25px; }
+  .frame-gap-left   { top:0; bottom:0; left:calc(58vw); width:25px; }
+
+  .moon {
+    position:absolute; top:30px; left:40px; font-size:110px; line-height:1; z-index:30;
+    filter: drop-shadow(0 0 30px #ffe9a8) drop-shadow(0 0 60px #ffcc55); user-select:none;
+  }
+  .star {
+    position:absolute; color:#ffffff; font-size:24px; line-height:1; z-index:29; user-select:none;
+    animation: twinkle 2.6s infinite alternate; text-shadow: 0 0 12px #ffffff, 0 0 24px #b8a4dc, 0 0 40px #7fe0ff;
+  }
+  .star.s2{top:90px;left:320px;font-size:16px}.star.s4{top:120px;left:520px;font-size:14px}.star.s5{top:70px;left:600px;font-size:20px}
+  .star.s6{top:25px;left:700px;font-size:18px}.star.s7{top:320px;left:280px;font-size:12px}.star.s8{top:110px;left:760px;font-size:16px}
+  .star.s10{top:350px;left:150px;font-size:14px}.star.s12{top:180px;left:680px;font-size:16px}.star.s14{top:300px;left:400px;font-size:18px}
+  .star.s15{top:95px;left:800px;font-size:14px}.star.s16{top:380px;left:320px;font-size:12px}.star.s17{top:50px;left:880px;font-size:20px}
+  .star.s18{top:100px;left:950px;font-size:16px}.star.s19{top:30px;left:1000px;font-size:22px}.star.s20{top:140px;left:1050px;font-size:14px}
+  .star.s21{top:80px;left:920px;font-size:18px}.star.s22{top:190px;left:980px;font-size:12px}.star.s23{top:160px;left:1080px;font-size:16px}
+  .star.s24{top:220px;left:850px;font-size:14px}.star.s25{top:240px;left:1020px;font-size:12px}.star.s26{top:20px;left:900px;font-size:18px}
+  .star.sL1{top:280px;left:25px;font-size:22px}.star.sL2{top:360px;left:55px;font-size:16px}.star.sL3{top:440px;left:15px;font-size:24px}
+  .star.sL4{top:520px;left:65px;font-size:14px}.star.sL5{top:600px;left:35px;font-size:20px}.star.sL6{top:680px;left:75px;font-size:18px}
+  .star.sL7{top:760px;left:20px;font-size:16px}.star.sL8{top:840px;left:50px;font-size:22px}.star.sL9{top:320px;left:40px;font-size:12px}
+  .star.sL10{top:480px;left:70px;font-size:18px}.star.sL11{top:560px;left:10px;font-size:14px}.star.sL12{top:720px;left:60px;font-size:20px}
+  .star.sR1{top:280px;left:920px;font-size:20px}.star.sR2{top:360px;left:980px;font-size:16px}.star.sR3{top:440px;left:890px;font-size:24px}
+  .star.sR4{top:520px;left:1020px;font-size:14px}.star.sR5{top:600px;left:950px;font-size:22px}.star.sR6{top:680px;left:1050px;font-size:18px}
+  .star.sR7{top:760px;left:900px;font-size:16px}.star.sR8{top:840px;left:1000px;font-size:20px}.star.sR9{top:320px;left:1070px;font-size:12px}
+  .star.sR10{top:480px;left:930px;font-size:18px}.star.sR11{top:560px;left:1030px;font-size:14px}.star.sR12{top:720px;left:960px;font-size:22px}
+  .star.sL15{top:180px;left:80px;font-size:20px}.star.sL17{top:220px;left:140px;font-size:16px}.star.sL18{top:160px;left:200px;font-size:22px}
+  .star.sL20{top:240px;left:60px;font-size:14px}.star.sL21{top:200px;left:260px;font-size:18px}.star.sL23{top:260px;left:120px;font-size:20px}
+  .star.sL24{top:190px;left:300px;font-size:16px}.star.sL30{top:280px;left:180px;font-size:12px}.star.sL31{top:340px;left:120px;font-size:18px}
+  .star.sL32{top:400px;left:180px;font-size:16px}.star.sL33{top:460px;left:140px;font-size:20px}.star.sL34{top:520px;left:200px;font-size:14px}
+  .star.sL35{top:580px;left:160px;font-size:22px}.star.sL36{top:640px;left:220px;font-size:16px}.star.sL37{top:700px;left:130px;font-size:18px}
+  .star.sL38{top:760px;left:190px;font-size:14px}.star.sL39{top:820px;left:150px;font-size:20px}.star.sL40{top:880px;left:210px;font-size:16px}
+
+  @keyframes twinkle { 0% { opacity:0.2; transform:scale(0.8); } 100% { opacity:1; transform:scale(1.3); } }
+
+  .wizard-emoji {
+    position:absolute; left:42%; bottom:0; transform:translate(-50%, 0); font-size: 760px; line-height: 0.82; z-index:10;
+    user-select: none; filter: drop-shadow(0 0 60px #7a1a40) drop-shadow(0 0 120px #3d0a1e);
+  }
+
+  .poem {
+    position:absolute; left:42%; top: 20px; transform:translate(-50%, 0); z-index:15;
+    font-family: Arial, sans-serif; font-weight: bold; font-size: 30px; color: #ffffff; text-align: center; line-height: 1.4; white-space: pre-line;
+    text-shadow: 0 0 8px rgba(255,255,255,0.9), 0 0 16px rgba(184,164,220,0.7), 2px 2px 4px rgba(0,0,0,0.6); user-select: none; pointer-events: none; letter-spacing: 0.5px;
+  }
+
+  .vignette { position:absolute; inset:0; background: radial-gradient(circle at 45% 50%, transparent 45%, rgba(0,0,0,0.45) 100%); pointer-events:none; z-index:40; }
+
+  .game-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
+  .screen { display: none; width: 100%; }
+  .screen.active { display: flex; flex-direction: column; animation: fadeIn 0.4s; flex-grow: 1; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .game-title { font-family: Arial, sans-serif; font-size: 2rem; color: #2980b9; text-align: center; margin-bottom: 15px; }
+  .legend-text { font-family: Arial, sans-serif; font-weight: bold; font-size: 1.4rem; color: #800020; text-align: center; line-height: 1.4; margin-bottom: 20px; word-wrap: break-word; }
+  
+  .rule-box {
+    background: #e8f4f8; border-left: 5px solid #2980b9; border-radius: 8px; padding: 15px; margin-bottom: 20px;
+    font-family: Arial, sans-serif; font-weight: bold; font-size: 1.3rem; color: #006400; line-height: 1.5;
+  }
+
+  .btn {
+    background: #27ae60; color: white; border: none; padding: 12px 30px; font-size: 1.2rem; font-weight: bold; border-radius: 30px; cursor: pointer;
+    box-shadow: 0 4px 0 #1e8449; transition: all 0.15s; margin: 10px auto; display: block; font-family: inherit;
+  }
+  .btn:active { transform: translateY(4px); box-shadow: none; }
+  .btn:disabled { background: #bdc3c7; box-shadow: 0 4px 0 #95a5a6; cursor: not-allowed; }
+
+  .game-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 15px; 
+    padding-bottom: 10px; 
+    border-bottom: 2px solid #eee;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .level-info { font-family: Arial, sans-serif; font-size: 1.1rem; font-weight: bold; color: #2980b9; }
+  
+  .score-display {
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #c0392b;
+    background: #fff5f5;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 2px solid #e74c3c;
+    white-space: nowrap;
+  }
+  .score-display .score-number {
+    color: #c0392b;
+    font-size: 1.4rem;
+  }
+
+  .instruction-text {
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #00008B;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+
+  .story-text {
+    font-family: Arial, sans-serif;
+    font-size: 1.6rem;
+    font-weight: bold;
+    line-height: 1.8;
+    margin-bottom: 20px;
+    color: #2c3e50;
+    text-align: center;
+  }
+
+  .blank-slot {
+    display: inline-block; background: #fff; border: 3px dashed #2980b9; padding: 4px 12px; border-radius: 8px; color: #2980b9; font-weight: bold;
+    cursor: pointer; margin: 0 4px; min-width: 100px; text-align: center; transition: all 0.2s; font-family: Arial, sans-serif; font-size: 1.4rem;
+  }
+  .blank-slot:hover { background: #ebf5fb; transform: scale(1.05); }
+  .blank-slot.filled { border-style: solid; cursor: default; background: #d6eaf8; }
+  .blank-slot.wrong { animation: shake 0.5s; border-color: #c0392b; background: #fadbd8; }
+  @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+
+  .question-block { 
+    margin-top: 20px; 
+    padding-top: 15px; 
+    border-top: 2px dashed #ddd; 
+    text-align: center; 
+  }
+  .question-block.hidden { display: none; }
+  .question-text { font-family: Arial, sans-serif; font-size: 1.4rem; font-weight: bold; margin-bottom: 15px; }
+  .yes-no-buttons { display: flex; justify-content: center; gap: 15px; margin-bottom: 10px; }
+  .btn-yes { background: #27ae60; box-shadow: 0 4px 0 #1e8449; }
+  .btn-no { background: #c0392b; box-shadow: 0 4px 0 #922b21; }
+
+  .feedback {
+    text-align: center; font-family: Arial, sans-serif; font-size: 1.2rem; font-weight: bold; padding: 12px; border-radius: 8px; margin: 15px 0; min-height: 20px;
+  }
+  .feedback.success { background: #d5f5e3; color: #27ae60; }
+  .feedback.error { background: #fadbd8; color: #c0392b; }
+  .feedback.success-red { 
+    background: #ffe6e6; 
+    color: #c0392b;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+
+  .end-screen-content { 
+    text-align: center; 
+    flex-grow: 1; 
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    padding: 20px;
+  }
+
+  .final-top-content {
+    text-align: center;
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .final-score-line {
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-size: 2.2rem;
+    color: #c0392b;
+    margin-bottom: 20px;
+    text-align: center;
+    line-height: 1.3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .final-score-line .big-score {
+    font-size: 2.8rem;
+    color: #c0392b;
+    display: inline-block;
+  }
+
+  .final-success-message {
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-size: 2rem;
+    color: #27ae60;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+  .final-success-submessage {
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: #006400;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+  .final-error-message {
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-size: 1.6rem;
+    color: #c0392b;
+    margin-bottom: 30px;
+    text-align: center;
+    background: #ffe6e6;
+    padding: 20px;
+    border-radius: 12px;
+    border: 2px solid #e74c3c;
+  }
+
+  /* Эмодзи внизу каждой страницы */
+  .page-bottom-emoji {
+    text-align: center;
+    font-size: 12em;
+    line-height: 1;
+    padding: 10px 0 0 0;
+    user-select: none;
+    position: relative;
+    z-index: 2;
+    margin-top: auto;
+  }
+
+  /* Широкая рамка на финальной странице - текст не переносится */
+  .final-rule-frame {
+    border: 3px solid #00008B;
+    background-color: #dbeaff;
+    padding: 25px 40px;
+    border-radius: 15px;
+    margin: 20px auto;
+    width: 95%;
+    max-width: 1400px;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-size: 1.5rem;
+    line-height: 2;
+    color: #00008B;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  }
+  .final-rule-line {
+    display: block;
+    white-space: nowrap;
+  }
+  .highlight-red {
+    font-weight: bold;
+    color: red;
+  }
+
+  .modal-overlay {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center;
+  }
+  .modal-overlay.active { display: flex; animation: fadeIn 0.3s; }
+  .modal { background: #ffffff; border-radius: 20px; padding: 25px; max-width: 450px; width: 90%; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; }
+  .modal h3 { color: #2980b9; margin-bottom: 15px; font-size: 1.2rem; }
+  .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .option-btn { background: white; border: 3px solid #bdc3c7; border-radius: 10px; padding: 12px; font-family: Arial, sans-serif; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+  .option-btn:hover { border-color: #2980b9; background: #ebf5fb; }
+  .option-btn.correct { background: #27ae60; color: white; border-color: #27ae60; }
+  .option-btn.wrong { background: #c0392b; color: white; border-color: #c0392b; }
+  .close-modal { background: #95a5a6; color: white; border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-size: 1rem; font-family: inherit; }
+
+  .confetti-container {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .confetti-piece {
+    position: absolute;
+    bottom: -20px;
+    width: 12px; height: 12px;
+    animation: flyUp linear forwards;
+  }
+  @keyframes flyUp {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(-120vh) rotate(720deg); opacity: 0.8; }
+  }
+
+  @media (max-width: 1024px) {
+    .scene { width: 50vw; }
+    .frame-right { left: calc(50vw + 25px); padding: 25px; }
+    .frame-gap-left { left: calc(50vw); }
+    .frame-gap-top, .frame-gap-bottom { left: calc(50vw); }
+    .wizard-emoji { font-size: 600px; left: 40%; }
+    .poem { left: 40%; font-size: 26px; }
+    .final-score-line { font-size: 1.9rem; }
+    .final-score-line .big-score { font-size: 2.4rem; }
+    .page-bottom-emoji { font-size: 10em; }
+    .final-rule-frame { font-size: 1.3rem; padding: 20px 30px; }
+  }
+
+  @media (max-width: 768px) {
+    html, body { overflow: auto; height: auto; }
+    .scene { position: relative; width: 100vw; height: 40vh; bottom: auto; }
+    .frame-right {
+      position: relative; top: auto; left: auto; right: auto; bottom: auto;
+      width: 100vw; height: auto; min-height: 60vh; border-radius: 20px 20px 0 0; margin-top: -20px; padding: 20px;
+    }
+    .frame-gap-top, .frame-gap-bottom, .frame-gap-right, .frame-gap-left { display: none; }
+    .wizard-emoji { font-size: 200px; left: 50%; top: 50%; transform: translate(-50%, -50%); bottom: auto; }
+    .poem { top: 15px; left: 50%; font-size: 20px; transform: translate(-50%, 0); }
+    .star { font-size: 14px !important; }
+    .legend-text { font-size: 1.2rem; }
+    .game-title { font-size: 1.6rem; }
+    .story-text { font-size: 1.3rem; }
+    .blank-slot { font-size: 1.1rem; min-width: 80px; }
+    .game-header { flex-direction: column; align-items: stretch; }
+    .score-display { font-size: 1.1rem; text-align: center; }
+    .final-score-line { font-size: 1.5rem; }
+    .final-score-line .big-score { font-size: 2rem; }
+    .final-success-message { font-size: 1.6rem; }
+    .final-success-submessage { font-size: 1.3rem; }
+    .final-error-message { font-size: 1.3rem; }
+    .page-bottom-emoji { font-size: 8em; }
+    .final-rule-frame { font-size: 1.1rem; padding: 15px 20px; }
+    .final-rule-line { white-space: normal; }
+  }
+
+  @media (max-width: 480px) {
+    .frame-right { padding: 15px; }
+    .btn { font-size: 1.1rem; padding: 10px 20px; width: 100%; }
+    .story-text { font-size: 1.2rem; }
+    .blank-slot { min-width: 70px; font-size: 1rem; padding: 4px 8px; }
+    .yes-no-buttons { flex-direction: column; gap: 10px; }
+    .options-grid { grid-template-columns: 1fr; }
+    .instruction-text { font-size: 1.1rem; }
+    .final-score-line { font-size: 1.2rem; }
+    .final-score-line .big-score { font-size: 1.7rem; }
+    .final-success-message { font-size: 1.4rem; }
+    .final-success-submessage { font-size: 1.1rem; }
+    .final-error-message { font-size: 1.1rem; padding: 15px; }
+    .page-bottom-emoji { font-size: 6em; }
+    .final-rule-frame { font-size: 1rem; }
+  }
+
+  @media (max-width: 360px) {
+    .legend-text { font-size: 1.1rem; }
+    .rule-box { font-size: 1rem; padding: 12px; }
+    .story-text { font-size: 1.1rem; }
+    .final-score-line { font-size: 1.1rem; }
+    .final-score-line .big-score { font-size: 1.5rem; }
+    .final-success-message { font-size: 1.2rem; }
+    .final-error-message { font-size: 1rem; }
+    .page-bottom-emoji { font-size: 5em; }
+  }
+
+  @media (max-height: 500px) and (orientation: landscape) {
+    .scene { display: none; }
+    .frame-right { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; border-radius: 0; margin: 0; }
+    .frame-gap-top, .frame-gap-bottom, .frame-gap-right, .frame-gap-left { display: none; }
+    .page-bottom-emoji { font-size: 5em; }
+  }
+
+  @media (max-height: 700px) and (min-width: 768px) {
+    .page-bottom-emoji { font-size: 9em; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="scene">
+    <div class="moon">🌜</div>
+    <div class="star s2">✧</div><div class="star s4">✧</div><div class="star s5">✦</div><div class="star s6">✧</div>
+    <div class="star s7">✦</div><div class="star s8">✧</div><div class="star s10">✧</div><div class="star s12">✧</div>
+    <div class="star s14">✧</div><div class="star s15">✦</div><div class="star s16">✧</div><div class="star s17">✦</div>
+    <div class="star s18">✧</div><div class="star s19">✦</div><div class="star s20">✧</div><div class="star s21"></div>
+    <div class="star s22">✧</div><div class="star s23">✦</div><div class="star s24">✧</div><div class="star s25">✦</div>
+    <div class="star s26">✧</div>
+    <div class="star sL1">✦</div><div class="star sL2">✧</div><div class="star sL3">✦</div><div class="star sL4">✧</div>
+    <div class="star sL5">✦</div><div class="star sL6">✧</div><div class="star sL7"></div><div class="star sL8">✧</div>
+    <div class="star sL9">✦</div><div class="star sL10">✧</div><div class="star sL11">✦</div><div class="star sL12">✧</div>
+    <div class="star sR1">✦</div><div class="star sR2">✧</div><div class="star sR3">✦</div><div class="star sR4">✧</div>
+    <div class="star sR5">✦</div><div class="star sR6">✧</div><div class="star sR7"></div><div class="star sR8">✧</div>
+    <div class="star sR9">✦</div><div class="star sR10">✧</div><div class="star sR11">✦</div><div class="star sR12">✧</div>
+    <div class="star sL15">✦</div><div class="star sL17">✦</div><div class="star sL18">✧</div><div class="star sL20">✧</div>
+    <div class="star sL21">✦</div><div class="star sL23">✦</div><div class="star sL24">✧</div><div class="star sL30">✧</div>
+    <div class="star sL31">✦</div><div class="star sL32">✧</div><div class="star sL33">✦</div><div class="star sL34">✧</div>
+    <div class="star sL35">✦</div><div class="star sL36">✧</div><div class="star sL37">✦</div><div class="star sL38">✧</div>
+    <div class="star sL39"></div><div class="star sL40">✧</div>
+
+    <div class="wizard-emoji">🧙</div>
+    <div class="poem">Я хитрый волшебник,<br>Колдую тайком,<br>Волшебною стёркой<br>Сотру всё кругом!</div>
+    <div class="vignette"></div>
+  </div>
+
+  <div class="frame-gap-top"></div>
+  <div class="frame-gap-bottom"></div>
+  <div class="frame-gap-right"></div>
+  <div class="frame-gap-left"></div>
+
+  <div class="frame-right">
+    <main class="game-container" role="main" aria-label="Игровое поле">
+      
+      <!-- ТИТУЛЬНАЯ СТРАНИЦА -->
+      <section id="screen-start" class="screen active">
+        <h1 class="game-title">Спаси предложения!</h1>
+        <p class="legend-text">Ой-ой-ой! Хитрый волшебник стёр ластиком некоторые слова из предложений. Теперь они потеряли смысл. Помоги вернуть слова на место, чтобы предложения стали понятны!</p>
+        
+        <div class="rule-box">
+          <p>В предложении слово‑предмет отвечает на вопрос „Кто?" или „Что?", а слово‑действие предмета отвечает на вопросы „Что делает?", „Что сделает?" и так далее.</p>
+        </div>
+        
+        <button class="btn" onclick="startGame()" aria-label="Начать игру">Начать спасение! 🚀</button>
+        
+        <!-- Эмодзи внизу титульной страницы -->
+        <div class="page-bottom-emoji">&#x1F469;&#x1F3FB;&#x200D;&#x1F393;&#x1F9D1;&#x1F3FC;&#x200D;&#x1F393;</div>
+      </section>
+
+      <!-- ИГРОВАЯ СТРАНИЦА -->
+      <section id="screen-game" class="screen">
+        <nav class="game-header" aria-label="Информация о прогрессе">
+          <div class="level-info">Задание <span id="current-level">1</span></div>
+          <div class="score-display" aria-live="polite">Верно: <span class="score-number" id="score-display">0</span></div>
+        </nav>
+
+        <div id="instruction-area"></div>
+        <div class="story-text" id="story-text" role="region" aria-label="Текст задания"></div>
+        
+        <div class="question-block hidden" id="question-block">
+          <p class="question-text" id="question-text">Это предложение?</p>
+          <div class="yes-no-buttons">
+            <button class="btn btn-yes" onclick="handleYesNo(true)" aria-label="Ответить Да">Да</button>
+            <button class="btn btn-no" onclick="handleYesNo(false)" aria-label="Ответить Нет">Нет</button>
+          </div>
+        </div>
+
+        <output class="feedback" id="feedback" role="status" aria-live="polite"></output>
+
+        <button class="btn" id="next-btn" onclick="nextLevel()" style="display:none;" aria-label="Перейти к следующему заданию">Следующее спасение ➡️</button>
+        
+        <!-- Эмодзи внизу игровой страницы -->
+        <div class="page-bottom-emoji">&#x1F469;&#x1F3FB;&#x200D;&#x1F393;&#x1F9D1;&#x1F3FC;&#x200D;&#x1F393;</div>
+      </section>
+
+      <!-- ФИНАЛЬНАЯ СТРАНИЦА -->
+      <section id="screen-end" class="screen end-screen-content">
+        <div class="confetti-container" id="confetti-container"></div>
+        
+        <div class="final-top-content">
+          <h1 class="final-score-line">
+            Из 12 заданий верно выполнено <span class="big-score" id="final-score">0</span>
+          </h1>
+          
+          <div id="final-message-area"></div>
+          
+          <!-- Широкая рамка: каждая строка на своём месте, не сползает -->
+          <div class="final-rule-frame">
+            <span class="final-rule-line">В каждом предложении есть <span class="highlight-red">главные члены</span>.</span>
+            <span class="final-rule-line">Они составляют <span class="highlight-red">основу</span> предложения.</span>
+            <span class="final-rule-line">В ней заключается смысл предложения.</span>
+          </div>
+        </div>
+        
+        <!-- Эмодзи внизу финальной страницы -->
+        <div class="page-bottom-emoji">&#x1F469;&#x1F3FB;&#x200D;&#x1F393;&#x1F9D1;&#x1F3FC;&#x200D;&#x1F393;</div>
+      </section>
+
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal">
+      <h3 id="modal-title">Выбери правильное слово</h3>
+      <div class="options-grid" id="options-grid" role="grid" aria-label="Варианты ответов"></div>
+      <button class="close-modal" onclick="closeModal()" aria-label="Закрыть окно выбора">Закрыть</button>
+    </div>
+  </div>
+
+<script>
+const levels = [
+  {
+    text: "Сегодня в школу рано.",
+    blanks: [],
+    question: "Это предложение?",
+    correctYesNo: false,
+    message: "",
+    instruction: ""
+  },
+  {
+    text: "Сегодня [blank1] [blank2] в школу рано.",
+    blanks: [
+      { id: "blank1", answer: "ученики", options: ["пассажиры", "ученики", "пешеходы", "пираты"] },
+      { id: "blank2", answer: "пришли", options: ["приползли", "притихли", "прикрутили", "пришли"] }
+    ],
+    question: "Это предложение?",
+    correctYesNo: true,
+    message: "Верно! Слова <strong>«ученики пришли»</strong> - это главные члены предложения.",
+    instruction: "Вставь пропущенные слова из выпадающего списка."
+  },
+  {
+    text: "Во дворе высокое.",
+    blanks: [],
+    question: "Это предложение?",
+    correctYesNo: false,
+    message: "",
+    instruction: ""
+  },
+  {
+    text: "Во дворе [blank1] высокое [blank2].",
+    blanks: [
+      { id: "blank1", answer: "растёт", options: ["вянет", "растёт", "поёт", "плачет"] },
+      { id: "blank2", answer: "дерево", options: ["дерево", "полено", "яблоко", "корыто"] }
+    ],
+    question: "Это предложение?",
+    correctYesNo: true,
+    message: "Верно! Слова <strong>«растёт дерево»</strong> - это главные члены предложения.",
+    instruction: "Вставь пропущенные слова из выпадающего списка."
+  },
+  {
+    text: "Из окна весёлая.",
+    blanks: [],
+    question: "Это предложение?",
+    correctYesNo: false,
+    message: "",
+    instruction: ""
+  },
+  {
+    text: "Из окна [blank1] весёлая [blank2].",
+    blanks: [
+      { id: "blank1", answer: "слышалась", options: ["пищала", "плясала", "свистела", "слышалась"] },
+      { id: "blank2", answer: "музыка", options: ["печка", "скатерть", "музыка", "посуда"] }
+    ],
+    question: "Это предложение?",
+    correctYesNo: true,
+    message: "Верно! Слова <strong>«слышалась музыка»</strong> - это главные члены предложения.",
+    instruction: "Вставь пропущенные слова из выпадающего списка."
+  },
+  {
+    text: "Утром за покупками в магазин.",
+    blanks: [],
+    question: "Это предложение?",
+    correctYesNo: false,
+    message: "",
+    instruction: ""
+  },
+  {
+    text: "Утром [blank1] [blank2] за покупками в магазин.",
+    blanks: [
+      { id: "blank1", answer: "родители", options: ["котята", "родители", "деревья", "бегемоты"] },
+      { id: "blank2", answer: "уехали", options: ["накопали", "убрали", "нырнули", "уехали"] }
+    ],
+    question: "Это предложение?",
+    correctYesNo: true,
+    message: "Верно! Слова <strong>«родители уехали»</strong> - это главные члены предложения.",
+    instruction: "Вставь пропущенные слова из выпадающего списка."
+  },
+  {
+    text: "По зимнему лесу голодный.",
+    blanks: [],
+    question: "Это предложение?",
+    correctYesNo: false,
+    message: "",
+    instruction: ""
+  },
+  {
+    text: "По зимнему лесу [blank1] голодный [blank2].",
+    blanks: [
+      { id: "blank1", answer: "бродит", options: ["кусает", "плачет", "бродит", "носит"] },
+      { id: "blank2", answer: "волк", options: ["тапок", "тополь", "лиса", "волк"] }
+    ],
+    question: "Это предложение?",
+    correctYesNo: true,
+    message: "Верно! Слова <strong>«бродит волк»</strong> - это главные члены предложения.",
+    instruction: "Вставь пропущенные слова из выпадающего списка."
+  },
+  {
+    text: "деревья в пушистый наряд.",
+    blanks: [],
+    question: "Это предложение?",
+    correctYesNo: false,
+    message: "",
+    instruction: ""
+  },
+  {
+    text: "В пушистый наряд [blank1] [blank2] деревья.",
+    blanks: [
+      { id: "blank1", answer: "одела", options: ["швея", "одела", "продавец", "доктор"] },
+      { id: "blank2", answer: "зима", options: ["швея", "зима", "продавец", "доктор"] }
+    ],
+    question: "Это предложение?",
+    correctYesNo: true,
+    message: "Верно! Слова <strong>«одела зима»</strong> - это главные члены предложения.",
+    instruction: "Вставь пропущенные слова из выпадающего списка."
+  }
+];
+
+let currentLevelIdx = 0;
+let score = 0;
+let restoredMembers = 0;
+let hasErrors = false;
+let levelState = {
+  filledBlanks: [],
+  yesNoAnsweredCorrectly: false,
+  levelCompleted: false,
+  madeMistakeOnLevel: false
+};
+let currentBlankId = null;
+let confettiInterval = null;
+
+function startGame() {
+  document.getElementById('screen-start').classList.remove('active');
+  document.getElementById('screen-game').classList.add('active');
+  loadLevel();
+}
+
+function updateScoreDisplay() {
+  document.getElementById('score-display').textContent = restoredMembers;
+}
+
+function loadLevel() {
+  const level = levels[currentLevelIdx];
+  levelState = { 
+    filledBlanks: [], 
+    yesNoAnsweredCorrectly: false, 
+    levelCompleted: false,
+    madeMistakeOnLevel: false
+  };
+  
+  document.getElementById('current-level').textContent = currentLevelIdx + 1;
+  document.getElementById('feedback').textContent = "";
+  document.getElementById('feedback').className = "feedback";
+  document.getElementById('next-btn').style.display = "none";
+  document.getElementById('question-text').textContent = level.question;
+  
+  const instructionArea = document.getElementById('instruction-area');
+  if (level.instruction) {
+    instructionArea.innerHTML = `<div class="instruction-text">${level.instruction}</div>`;
+  } else {
+    instructionArea.innerHTML = "";
+  }
+  
+  let html = level.text;
+  level.blanks.forEach(blank => {
+    html = html.replace(`[${blank.id}]`, `<span class="blank-slot" data-blank-id="${blank.id}" onclick="openModal('${blank.id}')" role="button" tabindex="0" aria-label="Пропущенное слово, нажмите для выбора">???</span>`);
+  });
+  document.getElementById('story-text').innerHTML = html;
+  
+  const questionBlock = document.getElementById('question-block');
+  if (level.blanks.length === 0) {
+    questionBlock.classList.remove('hidden');
+  } else {
+    questionBlock.classList.add('hidden');
+  }
+}
+
+function openModal(blankId) {
+  const level = levels[currentLevelIdx];
+  const blank = level.blanks.find(b => b.id === blankId);
+  if (!blank || levelState.filledBlanks.includes(blankId)) return;
+  
+  currentBlankId = blankId;
+  
+  const grid = document.getElementById('options-grid');
+  grid.innerHTML = "";
+  
+  const shuffled = [...blank.options].sort(() => Math.random() - 0.5);
+  
+  shuffled.forEach(option => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = option;
+    btn.setAttribute('role', 'gridcell');
+    btn.onclick = () => selectOption(option, blank);
+    grid.appendChild(btn);
+  });
+  
+  document.getElementById('modal-overlay').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('active');
+  currentBlankId = null;
+}
+
+function selectOption(option, blank) {
+  const buttons = document.querySelectorAll('.option-btn');
+  const slot = document.querySelector(`[data-blank-id="${blank.id}"]`);
+  const feedback = document.getElementById('feedback');
+  
+  if (option === blank.answer) {
+    buttons.forEach(btn => {
+      if (btn.textContent === option) btn.classList.add('correct');
+    });
+    
+    slot.textContent = option;
+    slot.classList.add('filled');
+    slot.setAttribute('aria-label', `Выбрано слово: ${option}`);
+    
+    if (!levelState.filledBlanks.includes(blank.id)) {
+      levelState.filledBlanks.push(blank.id);
+    }
+    
+    feedback.className = 'feedback'; 
+    feedback.textContent = ''; 
+    
+    setTimeout(() => {
+      closeModal();
+      checkBlanksComplete();
+    }, 600);
+  } else {
+    buttons.forEach(btn => {
+      if (btn.textContent === option) btn.classList.add('wrong');
+    });
+    slot.classList.add('wrong');
+    
+    hasErrors = true;
+    levelState.madeMistakeOnLevel = true;
+    
+    feedback.className = 'feedback error';
+    feedback.textContent = '❌ Неверно! Подумай ещё раз.';
+    
+    setTimeout(() => {
+      buttons.forEach(btn => btn.classList.remove('wrong'));
+      slot.classList.remove('wrong');
+    }, 800);
+  }
+}
+
+function checkBlanksComplete() {
+  const level = levels[currentLevelIdx];
+  if (level.blanks.length > 0 && levelState.filledBlanks.length === level.blanks.length) {
+    document.getElementById('question-block').classList.remove('hidden');
+  }
+}
+
+function handleYesNo(isYes) {
+  const level = levels[currentLevelIdx];
+  const feedback = document.getElementById('feedback');
+  
+  if (isYes === level.correctYesNo) {
+    levelState.yesNoAnsweredCorrectly = true;
+    
+    if (level.message) {
+      feedback.className = 'feedback success-red';
+      feedback.innerHTML = level.message;
+    } else {
+      feedback.className = 'feedback success';
+      feedback.textContent = '✅ Верно!';
+    }
+    
+    checkLevelComplete();
+  } else {
+    hasErrors = true;
+    levelState.madeMistakeOnLevel = true;
+    
+    feedback.className = 'feedback error';
+    feedback.textContent = '❌ Неверно! Подумай ещё раз.';
+  }
+}
+
+function checkLevelComplete() {
+  const level = levels[currentLevelIdx];
+  const allBlanksFilled = level.blanks.length === 0 || levelState.filledBlanks.length === level.blanks.length;
+  
+  if (allBlanksFilled && levelState.yesNoAnsweredCorrectly && !levelState.levelCompleted) {
+    levelState.levelCompleted = true;
+    
+    if (!levelState.madeMistakeOnLevel) {
+      restoredMembers++;
+      updateScoreDisplay();
+    }
+    
+    document.getElementById('next-btn').style.display = 'block';
+    document.getElementById('next-btn').focus();
+  }
+}
+
+function nextLevel() {
+  currentLevelIdx++;
+  if (currentLevelIdx < levels.length) {
+    loadLevel();
+  } else {
+    endGame();
+  }
+}
+
+function endGame() {
+  document.getElementById('screen-game').classList.remove('active');
+  document.getElementById('screen-end').classList.add('active');
+  document.getElementById('final-score').textContent = restoredMembers;
+  
+  const messageArea = document.getElementById('final-message-area');
+  
+  if (!hasErrors) {
+    messageArea.innerHTML = `
+      <h1 class="final-success-message">Все предложения спасены!</h1>
+      <p class="final-success-submessage">Великолепно! Ты настоящий спасатель предложений!</p>
+    `;
+  } else {
+    messageArea.innerHTML = `
+      <p class="final-error-message">Были ошибки. К сожалению, не все предложения спасены.</p>
+    `;
+  }
+  
+  startConfetti();
+}
+
+function startConfetti() {
+  const container = document.getElementById('confetti-container');
+  container.innerHTML = "";
+  
+  const colors = ['#e74c3c', '#3498db', '#f1c40f', '#2ecc71', '#9b59b6', '#e67e22', '#ff69b4', '#00ced1'];
+  
+  for (let i = 0; i < 30; i++) {
+    setTimeout(() => createConfettiPiece(container, colors), i * 100);
+  }
+  
+  confettiInterval = setInterval(() => {
+    createConfettiPiece(container, colors);
+  }, 250);
+}
+
+function createConfettiPiece(container, colors) {
+  const confetti = document.createElement('div');
+  confetti.className = 'confetti-piece';
+  confetti.style.left = Math.random() * 100 + '%';
+  confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+  confetti.style.animationDuration = (Math.random() * 3 + 3) + 's';
+  confetti.style.width = (Math.random() * 8 + 8) + 'px';
+  confetti.style.height = confetti.style.width;
+  container.appendChild(confetti);
+  
+  setTimeout(() => {
+    if (confetti.parentNode) confetti.remove();
+  }, 6000);
+}
+
+function stopConfetti() {
+  if (confettiInterval) {
+    clearInterval(confettiInterval);
+    confettiInterval = null;
+  }
+}
+</script>
+</body>
+</html>
